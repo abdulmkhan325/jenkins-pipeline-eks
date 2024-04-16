@@ -1,0 +1,169 @@
+import java.text.SimpleDateFormat
+import java.util.Date 
+
+def date = new Date()
+def dateStamp = new SimpleDateFormat("yyyy-MM-dd").format(date)
+def clusterName = "rosa-${dateStamp}"
+def dockerImage = "react-app:v1-${dateStamp}"
+
+//docker creds
+def dockerUserName = "abdulmkhan325"
+def dockerRepo = "abdulmkhan325/github-projects"
+
+echo "Cluster Name: ${clusterName}"
+
+pipeline {  
+    agent any
+  
+    environment {
+        ROSA_TOKEN =  credentials('aws-token-rosa') 
+        DOCKER_PASS = credentials('docker-password') 
+        AWS_CREDENTIALS_ID = 'aws-majid-v2'
+    }
+
+    stages {
+        // Check sudo permissions for jenkins
+        stage('Check sudo privileage') {
+            steps { 
+                sh """
+                    whoami
+                    sudo ls
+                """
+            }
+        }
+        // Upgrade yum Package Manager
+        stage('Yum Upgrade') { 
+            steps {
+                sh """  
+                    sudo yum upgrade -y
+                    yum --version
+                """.stripIndent()  
+            }
+        } 
+        // Install Dependencies and Check
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Check if Installed 
+                    def terraformInstalled = sh(script: 'which terraform', returnStatus: true) == 0
+                    def kubectlInstalled = sh(script: 'which kubectl', returnStatus: true) == 0
+                    def ansibleInstalled = sh(script: 'which ansible', returnStatus: true) == 0 
+                    def dockerInstalled = sh(script: 'which docker', returnStatus: true) == 0
+
+                    // Install if not found 
+                    if (!terraformInstalled) {
+                        sh "sudo yum install terraform -y"
+                    }
+                    if (!kubectlInstalled) {
+                        sh "sudo yum install kubectl -y"
+                    }
+                    if (!ansibleInstalled) {
+                        sh "sudo yum install ansible -y"
+                    }
+                    if (!dockerInstalled) {
+                        sh "sudo yum install docker -y"
+                    }
+                    // Display versions of installed dependencies
+                    sh """
+                        terraform --version
+                        kubectl version --client
+                        ansible --version
+                        docker --version  
+                    """.stripIndent()
+                }
+            }
+        }  
+
+        // Docker Stages  
+        stage("Docker Login"){
+            steps { 
+                sh """
+                    docker login -u ${dockerUserName} -p ${DOCKER_PASS}   
+                """
+            }
+        } 
+        stage("Docker Build"){
+            steps {    
+                sh """
+                    cd react-app  
+                    ls
+                    docker build -t ${dockerImage} .      
+                """
+            }
+        } 
+        stage("Docker Tag"){
+            steps { 
+                sh """
+                    docker tag ${dockerImage} abdulmkhan325/github-projects:${dateStamp}   
+                """
+            }
+        } 
+        stage("Docker Push"){
+            steps { 
+                sh """
+                    docker push abdulmkhan325/github-projects:${dateStamp}     
+                """
+            }
+        }
+
+        // Terraform Stages
+
+        stage('Initializing Terraform'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform init'
+                    }
+                }
+            }
+        }
+        stage('Formatting Terraform Code'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform fmt'
+                    }
+                }
+            }
+        }
+        stage('Validating Terraform'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform validate'
+                    }
+                }
+            }
+        }
+        stage('Previewing the Infra using Terraform'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform plan'
+                    }
+                    input(message: "Are you sure to proceed?", ok: "Proceed")
+                }
+            }
+        }
+        // stage('Creating/Destroying an EKS Cluster'){
+        //     steps{
+        //         script{
+        //             dir('infra') {
+        //                 sh 'terraform $action --auto-approve'
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Deploying Nginx Application') {
+        //     steps{
+        //         script{
+        //             dir('infra/config') {
+        //                 sh 'aws eks update-kubeconfig --name my-eks-cluster'
+        //                 sh 'kubectl apply -f deployment.yaml'
+        //                 sh 'kubectl apply -f service.yaml'
+        //             }
+        //         }
+        //     }
+        // }
+    }
+}
