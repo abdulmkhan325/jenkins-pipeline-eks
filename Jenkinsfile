@@ -32,13 +32,58 @@ pipeline {
             }
         }
         // Upgrade yum Package Manager
-        stage('Yum Upgrade') { 
+        stage('Yum Upgrade') {
             steps {
-                sh """  
-                    sudo yum upgrade -y
-                    yum --version
-                """.stripIndent()  
+                script {
+                    // Check if there are updates available
+                    def updatesAvailable = sh(script: 'sudo yum check-update', returnStatus: true) == 100
+                    if (updatesAvailable) { 
+                        sh """
+                            sudo yum upgrade -y
+                            yum --version
+                        """.stripIndent()
+                    } else {
+                        echo "No updates available."
+                    }
+                }
+            }
+        }
+        // Install Dependencies and Check
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Check if Installed 
+                    def terraformInstalled = sh(script: 'which terraform', returnStatus: true) == 0
+                    def kubectlInstalled = sh(script: 'which kubectl', returnStatus: true) == 0
+                    def ansibleInstalled = sh(script: 'which ansible', returnStatus: true) == 0 
+                    def dockerInstalled = sh(script: 'which docker', returnStatus: true) == 0
+
+                    // Install if not found 
+                    if (!terraformInstalled) {
+                        sh "sudo yum install terraform -y"
+                    }
+                    if (!kubectlInstalled) {
+                        sh "sudo yum install kubectl -y"
+                    }
+                    if (!ansibleInstalled) {
+                        sh "sudo yum install ansible -y"
+                    }
+                    if (!dockerInstalled) {
+                        sh "sudo yum install docker -y"
+                    }
+                    // Display versions of installed dependencies
+                    sh """
+                        terraform --version
+                        kubectl version --client
+                        ansible --version
+                        docker --version  
+                    """.stripIndent()
+                }
             }
         }  
+
+
+
+
     }
 }
