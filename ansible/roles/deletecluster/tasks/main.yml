@@ -1,0 +1,43 @@
+- name: Delete Rosa Cluster
+  debug:
+    msg: Deleting cluster  -> '{{ clustername }}'
+
+- name: Check ROSA plugin exist
+  ansible.builtin.command: rosa version
+  register: plugin_exist
+
+- debug : msg="{{ plugin_exist.stdout }}"
+  failed_when: plugin_exist.rc != 0
+
+- name: Check AWS Cluster
+  ansible.builtin.command: rosa describe cluster --cluster={{ clustername }} -o yaml
+  register: check_cluster
+  no_log: true 
+  ignore_errors: true 
+
+- name: Print if error exists
+  debug:
+    msg: "{{ check_cluster.stderr }}" 
+  failed_when: check_cluster.stderr | length > 0
+
+- name: Print cluster exists! 
+  set_fact: 
+    delete_flag: true
+  when: check_cluster.stderr | length == 0  
+
+- name: Print Delete Flag
+  debug:
+    msg: "{{ delete_flag }}"   
+
+- name: Delete AWS Cluster
+  ansible.builtin.command: rosa delete cluster --cluster={{ clustername }} --yes
+  register: delete_cluster_stdout
+  when: delete_flag == true
+
+- name: Cluster Delete Initiated
+  debug: msg="{{ delete_cluster_stdout }}"
+
+- name: Waiting till Cluster Deleted Successfully
+  ansible.builtin.command: rosa describe cluster --cluster={{ clustername }}
+  register: cmd_res
+  until: cmd_res.stderr | length > 0 

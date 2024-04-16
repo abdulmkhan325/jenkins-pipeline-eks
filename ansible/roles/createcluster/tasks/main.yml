@@ -1,0 +1,13 @@
+- name: Print Variables
+  debug:
+    msg: This is the cluster name '{{ clustername }}'
+    #msg: This is the cluster name '{{ clustername }}' and '{{ filepath }}' 
+ 
+- name: Create ROSA Cluster Role 
+  script: roles/createcluster/scripts/createcluster.sh "{{ clustername }}" "{{ token }}"    
+  register: output
+
+- debug:
+    var: output.stdout
+
+   

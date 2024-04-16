@@ -1,0 +1,15 @@
+- name: ROSA Cluster Operations
+  hosts: localhost
+
+  tasks:
+ 
+  - name: Overview
+    debug:
+      msg: |
+        Deleting AWS ROSA cluster '{{ cluster_name | mandatory }}'
+  
+  - name: Delete the ROSA AWS cluster
+    include_role:
+      name: deletecluster 
+    vars: 
+      clustername: '{{ cluster_name }}'

@@ -1,0 +1,24 @@
+...
+Pipeline Structure - CI/CD
+------------------
+Ansible
+  - Create Cluster (Bash Script running from an Ansible Playbook)
+  - Delete Cluster (Ansible Playbook)
+
+
+App development + build operator bundle(CI/CD)
+------------------
+React Web App
+  - App can be a simple website 
+  - Containerize - Docker
+  - Image CI/CD using Jenkins locally 
+
+Test application
+
+Use terraform tf code to create the AWS EKS Cluster 
+
+Implement the deployment file using kubectl - nginx 
+
+Running the application on EKS cluster 
+
+ 

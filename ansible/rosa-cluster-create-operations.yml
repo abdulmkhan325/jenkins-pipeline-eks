@@ -1,0 +1,16 @@
+- name: ROSA Cluster Create Operation
+  hosts: localhost
+
+  tasks:
+ 
+  - name: Overview
+    debug:
+      msg: |
+        Creating AWS ROSA cluster '{{ cluster_name | mandatory }}'
+ 
+  - name: Create the ROSA AWS cluster
+    include_role:
+      name: createcluster
+    vars: 
+      clustername: '{{ cluster_name }}'   
+      token: '{{ token }}' 

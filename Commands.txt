@@ -1,0 +1,99 @@
+
+Commands Used   
+
+-- In order to run the cluster setup playbook
+ansible-playbook ./ansible/rosa-cluster-create-operations.yml --extra-vars "cluster_name=rosa4v5 credentials_file=/Users/Sunny/Documents/Projects/clusteroperations/ansible/roles/createcluster/scripts/.credentials"
+
+-- To view cluster installation logs
+rosa logs install -c rosa4v5 --watch 
+
+-- Delete the cluster using its name 
+ansible-playbook ./ansible/rosa-cluster-delete-operations.yml --extra-vars "cluster_name=rosa4v4"
+
+-- Describe Cluster by name 
+rosa describe cluster --cluster=<cluster_name> 
+
+-- Delete Cluster by name
+rosa delete cluster --cluster=<cluster_name> --watch --yes 
+rosa delete cluster --cluster=rosa4v5 --watch --yes    
+
+"docker-build": "docker build -t $(dockerUsername)/react-todo-app:$(tagName) .",
+"docker-run": "docker run --rm -p 3000:3000 -v $(pwd):/app $(dockerUsername)/react-todo-app:$(tagName)"
+
+
+./createcluster2.sh "rosa4v5" "/Users/Sunny/Documents/Projects/clusteroperations/ansible/roles/createcluster/scripts/.credentials"
+
+./createcluster2.sh "rosa4v5" "pass"
+
+
+ansible-playbook rosa-cluster-create-operations.yml --extra-vars "cluster_name=rosa4v5 token=/Users/Sunny/Documents/Projects/clusteroperations/ansible/roles/createcluster/scripts/.credentials"
+
+ansible-playbook rosa-cluster-create-operations.yml --extra-vars "cluster_name=rosa4v5 token=pass"
+
+
+
+sudo yum install ansible 
+wget https://mirror.openshift.com/pub/openshift-v4/clients/rosa/latest/rosa-linux.tar.gz
+                    tar xvf rosa-linux.tar.gz
+                    pwd
+                    ls
+                    sudo mv rosa /usr/local/bin/rosa
+                    rosa version
+
+
+        // Create AWS Cluster
+        stage('Create AWS ROSA Cluster') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
+                    sh "ansible-playbook ansible/rosa-cluster-create-operations.yml -e 'cluster_name=${clusterName}' -e token='${ROSA_TOKEN}'"
+                }
+            }
+        }
+        // Delete AWS Cluster
+        stage('Delete AWS Rosa Cluster') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
+                    sh "ansible-playbook ansible/rosa-cluster-delete-operations.yml -e 'cluster_name=${clusterName}'"
+                }
+            }
+        }
+        
+
+
+
+        // Rosa Download and Install
+        stage('ROSA Download and Install') {
+            steps { 
+                sh """
+                    wget https://mirror.openshift.com/pub/openshift-v4/clients/rosa/latest/rosa-linux.tar.gz
+                    tar xvf rosa-linux.tar.gz 
+                    sudo mv rosa /usr/local/bin/rosa
+                    rosa version 
+                    """.stripIndent()    
+            }
+        }
+        // Rosa Login
+        stage('ROSA Install and Login') {
+            steps { 
+                sh """ 
+                    rosa login -t '${ROSA_TOKEN}'
+                    """.stripIndent()    
+            }
+        }
+
+
+
+rosa login --token="eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJhZDUyMjdhMy1iY2ZkLTRjZjAtYTdiNi0zOTk4MzVhMDg1NjYifQ.eyJpYXQiOjE3MDg2NzkyODMsImp0aSI6IjZjOTgxMGNmLWViOTUtNGQ2MC1hNWNjLTkzNzRhMGQwNTYyNyIsImlzcyI6Imh0dHBzOi8vc3NvLnJlZGhhdC5jb20vYXV0aC9yZWFsbXMvcmVkaGF0LWV4dGVybmFsIiwiYXVkIjoiaHR0cHM6Ly9zc28ucmVkaGF0LmNvbS9hdXRoL3JlYWxtcy9yZWRoYXQtZXh0ZXJuYWwiLCJzdWIiOiJmOjUyOGQ3NmZmLWY3MDgtNDNlZC04Y2Q1LWZlMTZmNGZlMGNlNjphYmR1bG1hamlka2hhbjU5IiwidHlwIjoiT2ZmbGluZSIsImF6cCI6ImNsb3VkLXNlcnZpY2VzIiwibm9uY2UiOiIzYjUzMmU4ZS01ZjkyLTQxMTktOGM3Yy0xYmFiYWM0MmFiOGQiLCJzZXNzaW9uX3N0YXRlIjoiNGE2MTg3M2UtNTdiNS00MzBiLWJhOGQtYzFlZmMxMWZjODhiIiwic2NvcGUiOiJvcGVuaWQgYXBpLmlhbS5zZXJ2aWNlX2FjY291bnRzIG9mZmxpbmVfYWNjZXNzIiwic2lkIjoiNGE2MTg3M2UtNTdiNS00MzBiLWJhOGQtYzFlZmMxMWZjODhiIn0.rn2ayHTjFBI-Kdjs5KiAmMRNCJdv_1YDuv1RvLa1gfI"
+
+
+
+
+
+                    if [ $(getent group docker) ]; then  
+                        echo "docker group exists"  
+                        sudo usermod -aG docker jenkins
+                    else  
+                        echo "group does not exist."
+                        sudo groupadd docker
+                        sudo usermod -aG docker jenkins
+                    fi 
