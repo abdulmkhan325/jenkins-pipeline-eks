@@ -22,7 +22,7 @@ pipeline {
         AWS_CREDENTIALS_ID = 'aws-majid-v2'
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID') 
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY') 
-
+        AWS_DEFAULT_REGION = "ap-southeast-2"
     }
 
     stages {
@@ -142,8 +142,57 @@ pipeline {
                 }
             }
         } 
+        stage('Formatting Terraform Code'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform fmt'
+                    }
+                }
+            }
+        }
+        stage('Validating Terraform'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform validate'
+                    }
+                }
+            }
+        }
+        stage('Previewing the Infra using Terraform'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform plan'
+                    }
+                    input(message: "Are you sure to proceed?", ok: "Proceed")
+                }
+            }
+        }
+        stage('Creating/Destroying an EKS Cluster'){
+            steps{
+                script{
+                    dir('infra') {
+                        sh 'terraform $action --auto-approve'
+                    }
+                }
+            }
+        }
+        stage('Deploying Nginx Application') {
+            steps{
+                script{
+                    dir('infra/config') {
+                        sh """
+                            aws eks update-kubeconfig --name ${eksClusterName}
+                            kubectl apply -f deployment.yaml 
+                            kubectl apply -f service.yaml 
+                        """
+                    }
+                }
+            }
+        }
 
-        
 
     }
 }
