@@ -20,6 +20,9 @@ pipeline {
         ROSA_TOKEN =  credentials('aws-token-rosa') 
         DOCKER_PASS = credentials('docker-password') 
         AWS_CREDENTIALS_ID = 'aws-majid-v2'
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID') 
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY') 
+
     }
 
     stages {
