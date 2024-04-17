@@ -131,24 +131,7 @@ pipeline {
         //         """
         //     }
         // }
-
-        // EKS Cluster Creation Stage
-        stage("Check EKS Cluster Existence") {
-            steps {
-                script {
-                    def clusterStatus = sh(script: "aws eks describe-cluster --name ${eksClusterName} --query 'cluster.status' --output text", returnStatus: true).trim()
-
-                    if (clusterStatus == "ACTIVE") {
-                        echo "EKS cluster '${clusterName}' exists and is active."
-                        // Add further actions if needed
-                    } else {
-                        echo "EKS cluster '${clusterName}' does not exist or is not active."
-                        // Add further actions if needed
-                    }
-                }
-            }
-        }
-
+ 
         // Terraform Stages 
         stage('Initializing Terraform'){
             steps{
@@ -159,6 +142,8 @@ pipeline {
                 }
             }
         } 
+
+        
 
     }
 }
