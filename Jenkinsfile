@@ -116,10 +116,10 @@ pipeline {
         stage("Docker Run"){
             steps { 
                 sh """
-                    docker run --rm -p 3000:3000 -v $(pwd):/app ${dockerHubRepo}:${dockerImage}  
+                    docker run --rm -p 3000:3000 -v ${WORKSPACE}/react-app:/app ${dockerHubRepo}:${dockerImage}  
                 """
             }
         }
-        
+
     }
 }
