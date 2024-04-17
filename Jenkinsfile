@@ -4,7 +4,7 @@ import java.util.Date
 def date = new Date()
 def dateStamp = new SimpleDateFormat("yyyy.MM.dd").format(date)
 def clusterName = "rosa-${dateStamp}"
-def dockerImage = "react-app:v${dateStamp}"
+def dockerImage = "react-app-v${dateStamp}"
 
 //docker creds
 def dockerUserName = "abdulmkhan325"
