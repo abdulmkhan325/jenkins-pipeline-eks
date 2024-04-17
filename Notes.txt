@@ -106,8 +106,7 @@ pipeline {
             }
         }
 
-        // Terraform Stages
-
+        // Terraform Stages 
         stage('Initializing Terraform'){
             steps{
                 script{

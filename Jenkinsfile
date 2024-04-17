@@ -4,11 +4,10 @@ import java.util.Date
 def date = new Date()
 def dateStamp = new SimpleDateFormat("yyyy.MM.dd").format(date)
 def clusterName = "rosa-${dateStamp}"
+def eksClusterName = "my-eks-cluster"
+
 def dockerImage = "react-app"
 def dockerTag = "v${dateStamp}"
-
-
-//docker creds
 def dockerUserName = "abdulmkhan325"
 def dockerHubRepo = "abdulmkhan325/github-projects"
 
@@ -122,13 +121,41 @@ pipeline {
                 """
             }
         }
-        stage("Docker Run"){
-            steps { 
-                sh """
-                    docker run --rm -p 3000:3000 -v ${WORKSPACE}/react-app:/react-app ${dockerHubRepo}:${dockerTag}  
-                """
+        // stage("Docker Run"){
+        //     steps { 
+        //         sh """
+        //             docker run --rm -p 3000:3000 -v ${WORKSPACE}/react-app:/react-app ${dockerHubRepo}:${dockerTag}  
+        //         """
+        //     }
+        // }
+
+        // EKS Cluster Creation Stage
+        stage("Check EKS Cluster Existence") {
+            steps {
+                script {
+                    def clusterStatus = sh(script: "aws eks describe-cluster --name ${eksClusterName} --query 'cluster.status' --output text", returnStatus: true).trim()
+
+                    if (clusterStatus == "ACTIVE") {
+                        echo "EKS cluster '${clusterName}' exists and is active."
+                        // Add further actions if needed
+                    } else {
+                        echo "EKS cluster '${clusterName}' does not exist or is not active."
+                        // Add further actions if needed
+                    }
+                }
             }
         }
+
+        // Terraform Stages 
+        stage('Initializing Terraform'){
+            steps{
+                script{
+                    dir('infra'){
+                        sh 'terraform init'
+                    }
+                }
+            }
+        } 
 
     }
 }
