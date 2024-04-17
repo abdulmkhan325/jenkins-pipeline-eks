@@ -36,6 +36,8 @@ module "eks" {
   cluster_name    = "my-eks-cluster"
   cluster_version = "1.21"
   
+  cluster_endpoint_public_access = true
+
   vpc_id                   = data.aws_vpc.existing_vpc.id  
   subnet_ids               = [
     data.aws_subnet.existing_subnet_1.id,
