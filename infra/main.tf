@@ -16,7 +16,7 @@ data "aws_vpc" "existing_vpc" {
   id = "vpc-88aefdef"  # Specify the ID of your existing VPC
 }
 
-# Existing subnets
+# Existing public subnets
 data "aws_subnet" "existing_subnet_1" {
   id = "subnet-23c8f344"  # Replace with your first existing subnet ID
 }
@@ -35,10 +35,7 @@ module "eks" {
   
   cluster_name    = "my-eks-cluster"
   cluster_version = "1.29"
-  
-  cluster_endpoint_public_access = true
-  cluster_endpoint_private_access = false
-
+   
   vpc_id                   = data.aws_vpc.existing_vpc.id  
   subnet_ids               = [
     data.aws_subnet.existing_subnet_1.id,
@@ -60,9 +57,4 @@ module "eks" {
     Environment = "dev"
     Terraform   = "true"
   }
-}
-
-# Output the EKS cluster ID
-output "eks_cluster_id" {
-  value = module.eks.cluster_id
 }
