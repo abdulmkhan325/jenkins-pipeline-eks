@@ -37,6 +37,7 @@ module "eks" {
   cluster_version = "1.29"
   
   cluster_endpoint_public_access = true
+  cluster_endpoint_private_access = false
 
   vpc_id                   = data.aws_vpc.existing_vpc.id  
   subnet_ids               = [
