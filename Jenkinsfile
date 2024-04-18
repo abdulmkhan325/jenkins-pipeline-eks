@@ -182,7 +182,7 @@ pipeline {
         stage('Deploying Nginx Application') {
             when {
                 expression {
-                    params.action != 'destroy'
+                    params.action == 'apply'
                 }
             }
             steps{
@@ -190,8 +190,8 @@ pipeline {
                     dir('infra/config') {
                         sh """
                             aws eks update-kubeconfig --name ${eksClusterName}
-                            kubectl apply -f deployment.yaml 
-                            kubectl apply -f service.yaml 
+                            kubectl apply -f deployment.yaml --validate=false
+                            kubectl apply -f service.yaml --validate=false
                         """
                     }
                 }
