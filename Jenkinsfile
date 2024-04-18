@@ -180,6 +180,11 @@ pipeline {
             }
         }
         stage('Deploying Nginx Application') {
+            when {
+                expression {
+                    params.action != 'destroy'
+                }
+            }
             steps{
                 script{
                     dir('infra/config') {
