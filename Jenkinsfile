@@ -5,6 +5,7 @@ def date = new Date()
 def dateStamp = new SimpleDateFormat("yyyy.MM.dd").format(date)
 def clusterName = "rosa-${dateStamp}"
 def eksClusterName = "my-eks-cluster"
+def aws_region = "ap-southeast-2"
 
 def dockerImage = "react-app"
 def dockerTag = "v${dateStamp}"
@@ -188,9 +189,11 @@ pipeline {
             steps{
                 script{
                     dir('infra/config') {
-                        sh """
-                            aws eks update-kubeconfig --name ${eksClusterName}
-                            kubectl apply -f deployment.yaml --validate=false 
+                        sh """ 
+                            aws eks update-kubeconfig --name ${eksClusterName} --region ${aws_region}  
+                            export KUBECONFIG=/var/lib/jenkins/.kube/config
+                            kubectl get svc
+                            kubectl get pods
                         """
                     }
                 }
