@@ -190,8 +190,7 @@ pipeline {
                     dir('infra/config') {
                         sh """
                             aws eks update-kubeconfig --name ${eksClusterName}
-                            kubectl apply -f deployment.yaml --validate=false
-                            kubectl apply -f service.yaml --validate=false
+                            kubectl apply -f deployment.yaml --validate=false 
                         """
                     }
                 }
